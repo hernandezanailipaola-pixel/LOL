@@ -8,17 +8,17 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Sync highlights
-        # Reemplazamos 'addnab/docker-run-action' por un comando nativo
+        # Usamos docker run nativo para evitar el error de versión del cliente
         run: |
           docker run --rm \
           -v ${{ github.workspace }}:/code/resources \
-          -e BOOK_DB_ID=${{ vars.BOOK_DB_ID }} \
+          -e BOOK_DB_ID=${{ secrets.BOOK_DB_ID }} \
           -e NOTION_API_KEY=${{ secrets.NOTION_API_KEY }} \
           ghcr.io/arkalim/kindle-to-notion:master \
           node /code/dist/main.js
 
-      # Opcional: A veces Docker crea archivos como 'root'. 
-      # Esto asegura que el runner tenga permisos para el commit.
+      # Paso CRÍTICO: Docker crea archivos como 'root'. 
+      # Esto devuelve los permisos al usuario de GitHub Actions para poder hacer commit.
       - name: Fix permissions
         if: always()
         run: sudo chown -R $USER:$USER .
